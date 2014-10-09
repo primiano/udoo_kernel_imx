@@ -362,8 +362,8 @@ static iomux_v3_cfg_t mx6qd_UDOO_pads[] = {
 	MX6Q_PAD_NANDF_D3__GPIO_2_3,
 		// MX6Q_PAD_NANDF_D3__USDHC1_DAT7,
 
-	MX6Q_PAD_GPIO_19__GPIO_4_5,// da errore in fase di set di direzione
-		// MX6Q_PAD_GPIO_19__SPDIF_OUT1,
+	//MX6Q_PAD_GPIO_19__GPIO_4_5,// da errore in fase di set di direzione
+	MX6Q_PAD_GPIO_19__SPDIF_OUT1,
 		// MX6Q_PAD_GPIO_19__CCM_CLKO,	
 	MX6Q_PAD_DISP0_DAT22__GPIO_5_16,
 		// MX6Q_PAD_DISP0_DAT22__ECSPI1_MISO,
