@@ -1551,7 +1551,7 @@
 #define MX6DL_PAD_EIM_D19__UART1_RTS                                          \
 		IOMUX_PAD(0x0520, 0x0150, 4, 0x08F8, 0, MX6DL_UART_PAD_CTRL)
 #define MX6DL_PAD_EIM_D19__GPIO_3_19                                           \
-		IOMUX_PAD(0x0520, 0x0150, 5, 0x0000, 0, NO_PAD_CTRL)
+		IOMUX_PAD(0x0520, 0x0150, 5, 0x0000, 0, MX6DL_ECSPI_PAD_CTRL)
 #define MX6DL_PAD_EIM_D19__EPIT1_EPITO                                         \
 		IOMUX_PAD(0x0520, 0x0150, 6, 0x0000, 0, NO_PAD_CTRL)
 #define MX6DL_PAD_EIM_D19__PL301_SIM_MX6DL_PER1_HRESP                          \
