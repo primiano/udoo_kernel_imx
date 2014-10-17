@@ -839,7 +839,7 @@ static int imx_ssi_probe(struct platform_device *pdev)
 		dai = &imx_ssi_dai;
 
 	writel(0x0, ssi->base + SSI_SIER);
-	//clk_disable(ssi->clk);
+	clk_disable(ssi->clk);
 
 	ssi->dma_params_rx.dma_addr = res->start + SSI_SRX0;
 	ssi->dma_params_tx.dma_addr = res->start + SSI_STX0;
@@ -847,8 +847,8 @@ static int imx_ssi_probe(struct platform_device *pdev)
 	ssi->dma_params_tx.burstsize = 6;
 	ssi->dma_params_rx.burstsize = 4;
 
-	//ssi->dma_params_tx.peripheral_type = IMX_DMATYPE_SSI_SP;
-	//ssi->dma_params_rx.peripheral_type = IMX_DMATYPE_SSI_SP;
+	ssi->dma_params_tx.peripheral_type = IMX_DMATYPE_SSI_SP;
+	ssi->dma_params_rx.peripheral_type = IMX_DMATYPE_SSI_SP;
 
 	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx0");
 	if (res)

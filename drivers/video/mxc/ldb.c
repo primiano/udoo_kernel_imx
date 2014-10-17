@@ -107,31 +107,7 @@ static u8 g_edid[2][512];
 
 static struct fb_videomode ldb_modedb[] = {
 	{
-	 "LDB-WVGA", 57, 800, 480, 30060, // Rif. 800x480 Panel DATAVISION dtfs070d0shlx
-	 56, 50, 
-	 23, 20,
-	 150, 2,
-	 0,
-	 FB_VMODE_NONINTERLACED,
-	 FB_MODE_IS_DETAILED,},
-    {
-	 "LDB-SVGA", 57, 800, 600, 25000, // Rif. Panel 800x600
-	 40, 60,
-	 10, 10,
-	 20, 10,
-	 0,
-	 FB_VMODE_NONINTERLACED,
-	 FB_MODE_IS_DETAILED,},
-	{
-	 "LDB-WXGA", 59, 1368, 768, 13890, // Rif. 1366x768 Panel CHIMEI M156B3-LA1
-	 93, 33,
-	 22, 7,
-	 40, 4,
-	 0,
-	 FB_VMODE_NONINTERLACED,
-	 FB_MODE_IS_DETAILED,},
-	{
-	 "LDB-WXGA2", 60, 1280, 800, 14065,
+	 "LDB-WXGA", 60, 1280, 800, 14065,
 	 40, 40,
 	 10, 3,
 	 80, 10,

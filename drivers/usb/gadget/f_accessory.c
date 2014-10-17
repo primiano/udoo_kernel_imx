@@ -285,12 +285,12 @@ static void acc_complete_set_string(struct usb_ep *ep, struct usb_request *req)
 	struct acc_dev	*dev = ep->driver_data;
 	char *string_dest = NULL;
 	int length = req->actual;
-	/*
+
 	if (req->status != 0) {
 		pr_err("acc_complete_set_string, err %d\n", req->status);
 		return;
 	}
-	*/
+
 	switch (dev->string_index) {
 	case ACCESSORY_STRING_MANUFACTURER:
 		string_dest = dev->manufacturer;

@@ -1285,10 +1285,9 @@ static void uart_close(struct tty_struct *tty, struct file *filp)
 		 * one, we've got real problems, since it means the
 		 * serial port won't be shutdown.
 		 */
-		//printk(KERN_ERR "uart_close: bad serial port count; tty->count is 1, "
-		//       "port->count is %d\n", port->count);
-		//port->count = 1;
-		printk("uart_close: bad serial port count; tty->count is 1, port->count is %d\n ",port->count);
+		printk(KERN_ERR "uart_close: bad serial port count; tty->count is 1, "
+		       "port->count is %d\n", port->count);
+		port->count = 1;
 	}
 	if (--port->count < 0) {
 		printk(KERN_ERR "uart_close: bad serial port count for %s: %d\n",
