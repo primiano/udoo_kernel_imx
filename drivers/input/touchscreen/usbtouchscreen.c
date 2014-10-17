@@ -63,22 +63,9 @@ static int swap_xy;
 module_param(swap_xy, bool, 0644);
 MODULE_PARM_DESC(swap_xy, "If set X and Y axes are swapped.");
 
-static int hwcalib_xy = 1;
+static int hwcalib_xy;
 module_param(hwcalib_xy, bool, 0644);
 MODULE_PARM_DESC(hwcalib_xy, "If set hw-calibrated X/Y are used if available");
-
-#define TOUCHSCREEN_TYPE_NULL	0
-#define TOUCHSCREEN_TYPE_3M	1
-
-static int touchscreen_type = TOUCHSCREEN_TYPE_NULL;
-module_param(touchscreen_type, int, 0444);
-MODULE_PARM_DESC(touchscreen_type, "Return touchscreen type found");
-
-#ifdef CONFIG_TOUCHSCREEN_USB_3M
-static int calibration[9];
-module_param_array(calibration, int, NULL, S_IRUGO | S_IWUSR);
-MODULE_PARM_DESC(calibration, "Calibration param contains calibration factors");
-#endif
 
 /* device specifc data/functions */
 struct usbtouch_usb;
@@ -358,63 +345,16 @@ static int panjit_read_data(struct usbtouch_usb *dev, unsigned char *pkt)
 #define MTOUCHUSB_RESET                 7
 #define MTOUCHUSB_REQ_CTRLLR_ID         10
 
-#define XSCALE		0
-#define XYMIX		1
-#define XOFFSET		2
-#define YXMIX		3
-#define YSCALE		4
-#define YOFFSET		5
-#define SCALE		6
-#define XSIZE		7
-#define YSIZE		8
-
 static int mtouch_read_data(struct usbtouch_usb *dev, unsigned char *pkt)
 {
 	if (hwcalib_xy) {
-		dev->x = 0xffff -  ((pkt[4] << 8) | pkt[3]);
-		dev->y = ((pkt[6] << 8) | pkt[5]);
+		dev->x = (pkt[4] << 8) | pkt[3];
+		dev->y = 0xffff - ((pkt[6] << 8) | pkt[5]);
 	} else {
 		dev->x = (pkt[8] << 8) | pkt[7];
 		dev->y = (pkt[10] << 8) | pkt[9];
 	}
 	dev->touch = (pkt[2] & 0x40) ? 1 : 0;
-
-	if(calibration[SCALE] != 0)
-	{
-		u32 x = dev->x, y = dev->y;
-		u32 max_xc = 0, max_yc = 0;
-		if (hwcalib_xy)
-			max_xc = max_yc = 0xffff;
-		else
-		{
-			max_xc = dev->type->max_xc;
-			max_yc = dev->type->max_yc;
-		}
-
-//		printk(KERN_WARNING "usb: PRECALIB  X = %d  Y=%d, MAX=%d, %d\n", dev->x, dev->y, max_xc, max_yc);
-	
-		x = calibration[XSCALE] * dev->x +
-			calibration[XYMIX] * dev->y +
-			calibration[XOFFSET];
-
-//		x = ((x / calibration[SCALE]) * max_xc) / calibration[XSIZE];		
-		x = x / calibration[XSIZE];
-		if (x < 0)
-			x = 0;
-
-		y = calibration[YSCALE] * dev->y +
-			calibration[YXMIX] * dev->x +
-			calibration[YOFFSET];
-//		y = ((y / calibration[SCALE]) * max_yc) / calibration[YSIZE];
-		y = y / calibration[YSIZE];
-		if (y < 0)
-			y = 0;
-		
-		dev->x = x;
-		dev->y = y;
-//		printk(KERN_WARNING "usb: CALIB  X = %d  Y=%d\n", x, y);
-	}
-//	printk(KERN_WARNING "usb: using  X = %d  Y=%d\n", dev->x, dev->y);
 
 	return 1;
 }
@@ -452,8 +392,6 @@ static int mtouch_init(struct usbtouch_usb *usbtouch)
 		input_set_abs_params(usbtouch->input, ABS_X, 0, 0xffff, 0, 0);
 		input_set_abs_params(usbtouch->input, ABS_Y, 0, 0xffff, 0, 0);
 	}
-	
-	touchscreen_type = TOUCHSCREEN_TYPE_3M;
 
 	return 0;
 }
@@ -1591,9 +1529,6 @@ static int usbtouch_probe(struct usb_interface *intf,
 		}
 	}
 
-#ifdef CONFIG_TOUCHSCREEN_USB_3M
-	memset(calibration, 0, sizeof(calibration));
-#endif
 	return 0;
 
 out_unregister_input:

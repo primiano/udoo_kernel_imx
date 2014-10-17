@@ -11,17 +11,6 @@ menuconfig INPUT_TOUCHSCREEN
 
 if INPUT_TOUCHSCREEN
 
-config TOUCHSCREEN_SITRONIX_I2C_TOUCH
-	tristate "Sitronix I2C I/F Multi-Touch Controller"
-	depends on I2C
-	---help---
-	Say Y here if you have a Sitronix multitouch panel.
-
-	  If unsure, say N.
-
-	  To compile this driver as a module, choose M here: the
-	  module will be called sitronix_i2c_touch.
-
 config TOUCHSCREEN_88PM860X
 	tristate "Marvell 88PM860x touchscreen"
 	depends on MFD_88PM860X
@@ -712,28 +701,6 @@ config TOUCHSCREEN_TOUCHIT213
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called touchit213.
-
-config TOUCHSCREEN_TSC2006
-        tristate "TSC2006 based touchscreens"
-        depends on SPI_MASTER && GENERIC_HARDIRQS
-        help
-          Say Y here if you have a TSC2006 based touchscreen.
-
-	  If unsure, say N.
-
-	  To compile this driver as a module, choose M here: the
-	  module will be called tsc2006.
-
-config TOUCHSCREEN_TSC2004
-	tristate "TSC2004 based touchscreens"
-	depends on I2C
-	help
-	  Say Y here if you have a TSC2004 based touchscreen.
-
-	  If unsure, say N.
-
-	  To compile this driver as a module, choose M here: the
-	  module will be called tsc2004.
 
 config TOUCHSCREEN_TSC2005
         tristate "TSC2005 based touchscreens"
