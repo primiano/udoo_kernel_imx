@@ -29,10 +29,11 @@ enum led_brightness {
 };
 
 struct led_classdev {
-	const char		*name;
-	int			 brightness;
-	int			 max_brightness;
-	int			 flags;
+	const char	  *name;
+	int			  brightness;
+	int			  max_brightness;
+	int			  flags;
+	unsigned long period;
 
 	/* Lower 16 bits reflect status */
 #define LED_SUSPENDED		(1 << 0)

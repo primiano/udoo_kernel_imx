@@ -32,6 +32,15 @@ static inline int led_get_brightness(struct led_classdev *led_cdev)
 	return led_cdev->brightness;
 }
 
+
+static inline void led_set_period(struct led_classdev *led_cdev,
+                unsigned long value)
+{
+	led_cdev->period = value;
+	if (!(led_cdev->flags & LED_SUSPENDED))
+		led_cdev->brightness_set(led_cdev, led_cdev->brightness);
+}
+
 extern struct rw_semaphore leds_list_lock;
 extern struct list_head leds_list;
 

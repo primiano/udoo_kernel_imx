@@ -35,6 +35,7 @@
 #include <linux/i2c/pca953x.h>
 #include <linux/ata.h>
 #include <linux/ion.h>
+#include <linux/leds_pwm.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/map.h>
 #include <linux/mtd/partitions.h>
@@ -261,7 +262,7 @@ static int plt_sd4_pad_change(int clock) {
 
 	/* MMC 2 - SD_primary */
 static const struct esdhc_platform_data mx6q_sd3_data __initconst = {
-	.cd_gpio = MX6_SD3_CD,	
+	.cd_gpio = MX6_SD3_CD,
 	.wp_gpio = -1,
 	.always_present = 1,
 	.keep_power_at_suspend = 1,
@@ -375,7 +376,7 @@ static inline void mx6q_init_uart(void) {
 static void ov5640_mipi_camera_io_init(void)
 {
 	struct clk *clko1;
-	
+
 	if (cpu_is_mx6q())
 	{
 		mxc_iomux_v3_setup_pad(MX6Q_PAD_CSI0_MCLK__CCM_CLKO);
@@ -386,7 +387,7 @@ static void ov5640_mipi_camera_io_init(void)
 		mxc_iomux_v3_setup_pad(MX6DL_PAD_CSI0_MCLK__CCM_CLKO);
 		mxc_iomux_v3_setup_pad(MX6DL_PAD_CSI0_DAT18__GPIO_6_4);
 	}
-	
+
 	clko1 = clk_get(NULL, "clko_clk");
 	if (IS_ERR(clko1)) {
 		pr_err("can't get CLKO1 clock.\n");
@@ -395,17 +396,17 @@ static void ov5640_mipi_camera_io_init(void)
 		clk_set_rate(clko1, round);
 		clk_enable(clko1);
 	}
-	
+
 	/* Camera reset */
 	gpio_request(MX6_CAMERA_RST, "cam-reset");
 	gpio_direction_output(MX6_CAMERA_RST, 0);
 	msleep(1);
 	gpio_set_value(MX6_CAMERA_RST, 1);
 	msleep(100);
-	
+
 /* for mx6dl, mipi virtual channel 1 connect to csi 0*/
 	if (cpu_is_mx6dl())
-		mxc_iomux_set_gpr_register(13, 0, 3, 0);	
+		mxc_iomux_set_gpr_register(13, 0, 3, 0);
 }
 
 static void ov5640_mipi_camera_powerdown(int powerdown)
@@ -628,7 +629,7 @@ static struct fsl_mxc_ldb_platform_data ldb_data = {
 };
 
 static struct platform_pwm_backlight_data mx6_pwm_backlight_data = {
-	.pwm_id = 0,
+	.pwm_id = 1,
 	.max_brightness = 255,
 	.dft_brightness = 128,
 	.pwm_period_ns = 50000,
@@ -661,7 +662,7 @@ static struct mxc_audio_platform_data mx6_audio_data;
 static void audio_codec_ac97_cold_reset(struct snd_ac97 *ac97) {
     int ret = gpio_request(AC97_GPIO_TXFS, "ac97_reset");
 	if (ret) {
-		printk (KERN_ERR "request AC97_GPIO_TXFS failed!"); 
+		printk (KERN_ERR "request AC97_GPIO_TXFS failed!");
 	} else {
 		gpio_direction_output(AC97_GPIO_TXFS, 0);
 	    udelay(2);
@@ -829,7 +830,7 @@ static struct platform_device vmmc_reg_devices = {
  *                                  PCIE                               *
  ***********************************************************************/
 
-#if defined(CONFIG_IMX_PCIE) 
+#if defined(CONFIG_IMX_PCIE)
 static const struct imx_pcie_platform_data mx6_pcie_data  __initconst = {
 	.pcie_pwr_en	= -EINVAL,
 	.pcie_rst	= -EINVAL,
@@ -844,7 +845,7 @@ static const struct imx_pcie_platform_data mx6_pcie_data  __initconst = {
  *                                 SPI-NOR                             *
  ***********************************************************************/
 
-#if defined(CONFIG_MTD_M25P80) 
+#if defined(CONFIG_MTD_M25P80)
 static struct mtd_partition imx6_spi_nor_partitions[] = {
 	{
 	 .name = "bootloader",
@@ -925,8 +926,8 @@ static struct spi_board_info imx6_spi_device[] __initdata = {
 	{
 		.modalias				= "rtc-pcf2123",
 		.bus_num				= 0,
-		.chip_select			= 4,	
-//		.controller_data		= 
+		.chip_select			= 4,
+//		.controller_data		=
 		.mode					= SPI_MODE_0,
 	},
 };
@@ -1073,27 +1074,27 @@ void set_gpios_directions(void)
 	printk("####Called set_gpios_direction\n");
 
 	if(cpu_is_mx6q()){
-	
+
 		for (i = 0; i<ARRAY_SIZE(mx6q_set_in_inputmode) ; i++){
 			// printk("INPUT GPIO %d:", i);
 			ret = gpio_request (mx6q_set_in_inputmode[i], "gpio :D");
 			if (ret) {
 				printk("#### FAILED Eported gpio %d. error : %d \n", mx6q_set_in_inputmode[i], ret);
-			
-			} else {	
+
+			} else {
 				gpio_direction_input (mx6q_set_in_inputmode[i]);
 				gpio_export(mx6q_set_in_inputmode[i], true);
 				// printk(KERN_INFO "> Eported gpio %d (in the test input array )\n", test_gpios_set_in_inputmode[i]);
 			}
 		}
-	
-	
+
+
 		for (i = 0; i<ARRAY_SIZE(mx6q_set_in_outputmode_low); i++){
 			// printk("OUTPUT GPIO BASSO %d:", i);
 			ret = gpio_request (mx6q_set_in_outputmode_low[i], "gpio :S");
 			if (ret) {
 				printk("#### FAILED Eported gpio %d. error : %d \n", mx6q_set_in_outputmode_low[i], ret);
-			} else {	
+			} else {
 				gpio_direction_output (mx6q_set_in_outputmode_low[i], 0);
 				gpio_export(mx6q_set_in_outputmode_low[i], true);
 				// printk(KERN_INFO "> Eported gpio %d (in the test output LOW array )\n", test_gpios_set_in_outputmode_low[i]);
@@ -1102,10 +1103,10 @@ void set_gpios_directions(void)
 
 		for (i = 0; i<ARRAY_SIZE(mx6q_set_in_outputmode_high) ; i++){
 			// printk("OUTPUT GPIO ALTO %d:", i);
-			ret = gpio_request (mx6q_set_in_outputmode_high[i], "gpio :S"); 
+			ret = gpio_request (mx6q_set_in_outputmode_high[i], "gpio :S");
 			if (ret) {
 				printk("#### FAILED Eported gpio %d. error : %d \n", mx6q_set_in_outputmode_high[i], ret);
-			} else {	
+			} else {
 				gpio_direction_output (mx6q_set_in_outputmode_high[i], 1);
 				gpio_export(mx6q_set_in_outputmode_high[i], true);
 				// printk(KERN_INFO ">Eported gpio %d (in the test output HIGH array\n", test_gpios_set_in_outputmode_high[i]);
@@ -1118,21 +1119,21 @@ void set_gpios_directions(void)
 			ret = gpio_request (mx6dl_set_in_inputmode[i], "gpio :D");
 			if (ret) {
 				printk("#### FAILED Eported gpio %d. error : %d \n", mx6dl_set_in_inputmode[i], ret);
-			
-			} else {	
+
+			} else {
 				gpio_direction_input (mx6dl_set_in_inputmode[i]);
 				gpio_export(mx6dl_set_in_inputmode[i], true);
 				// printk(KERN_INFO "> Eported gpio %d (in the test input array )\n", test_gpios_set_in_inputmode[i]);
 			}
 		}
-	
-	
+
+
 		for (i = 0; i<ARRAY_SIZE(mx6dl_set_in_outputmode_low); i++){
 			// printk("OUTPUT GPIO BASSO %d:", i);
 			ret = gpio_request (mx6dl_set_in_outputmode_low[i], "gpio :S");
 			if (ret) {
 				printk("#### FAILED Eported gpio %d. error : %d \n", mx6dl_set_in_outputmode_low[i], ret);
-			} else {	
+			} else {
 				gpio_direction_output (mx6dl_set_in_outputmode_low[i], 0);
 				gpio_export(mx6dl_set_in_outputmode_low[i], true);
 				// printk(KERN_INFO "> Eported gpio %d (in the test output LOW array )\n", test_gpios_set_in_outputmode_low[i]);
@@ -1141,10 +1142,10 @@ void set_gpios_directions(void)
 
 		for (i = 0; i<ARRAY_SIZE(mx6dl_set_in_outputmode_high) ; i++){
 			// printk("OUTPUT GPIO ALTO %d:", i);
-			ret = gpio_request (mx6dl_set_in_outputmode_high[i], "gpio :S"); 
+			ret = gpio_request (mx6dl_set_in_outputmode_high[i], "gpio :S");
 			if (ret) {
 				printk("#### FAILED Eported gpio %d. error : %d \n", mx6dl_set_in_outputmode_high[i], ret);
-			} else {	
+			} else {
 				gpio_direction_output (mx6dl_set_in_outputmode_high[i], 1);
 				gpio_export(mx6dl_set_in_outputmode_high[i], true);
 				// printk(KERN_INFO ">Eported gpio %d (in the test output HIGH array\n", test_gpios_set_in_outputmode_high[i]);
@@ -1152,9 +1153,47 @@ void set_gpios_directions(void)
 		}
 	}
 	else
-		printk("#### No gpios to export");	
+		printk("#### No gpios to export");
 }
 
+
+/***********************************************************************
+ *                              LED PWM                                *
+ ***********************************************************************/
+
+static struct led_pwm imx_pwm_leds[] = {
+	{
+		.name		= "pwm1",
+		.pwm_id		= 0,
+		.max_brightness	= 32768,
+		.pwm_period_ns	= 1000000,
+	},
+	{
+		.name		= "pwm3",
+		.pwm_id		= 2,
+		.max_brightness	= 32768,
+		.pwm_period_ns	= 1000000,
+	},
+	{
+		.name		= "pwm4",
+		.pwm_id		= 3,
+		.max_brightness	= 32768,
+		.pwm_period_ns	= 1000000,
+	},
+};
+
+static struct led_pwm_platform_data imx_pwm_data = {
+	.num_leds	= ARRAY_SIZE(imx_pwm_leds),
+	.leds		= imx_pwm_leds,
+};
+
+static struct platform_device imx_pwm_leds_dev = {
+	.name	= "leds_pwm",
+	.id	= -1,
+	.dev	= {
+		.platform_data = &imx_pwm_data,
+	},
+};
 
 
 /***********************************************************************
@@ -1175,9 +1214,9 @@ static void __init mx6_board_init(void)
 	struct clk *clko2;
 	struct clk *new_parent;
 	int rate;
-	
+
 	printk("UDOO board init\n");
-	
+
 	if (cpu_is_mx6q())
 		mxc_iomux_v3_setup_multiple_pads(mx6qd_UDOO_pads,
 			ARRAY_SIZE(mx6qd_UDOO_pads));
@@ -1185,14 +1224,14 @@ static void __init mx6_board_init(void)
 		mxc_iomux_v3_setup_multiple_pads(mx6sdl_UDOO_pads,
 			ARRAY_SIZE(mx6sdl_UDOO_pads));
 	}
-	
+
 
 	set_gpios_directions();
 
 	ret = gpio_request (MX6_IO_MICRO, "IO MICRO");
 	if (ret) {
 		printk("failed to get MX6_IO_MICRO: %d\n", ret);
-	} else {	
+	} else {
 		gpio_direction_input (MX6_IO_MICRO);
 	}
 
@@ -1202,7 +1241,7 @@ static void __init mx6_board_init(void)
 	} else {
 		gpio_direction_output(MX6_LVDS_BLT_CTRL, 1);
 	}
-	
+
 #ifdef CONFIG_FEC_1588
 	/* Set GPIO_16 input for IEEE-1588 ts_clk and RMII reference clock
 	 * For MX6 GPR1 bit21 meaning:
@@ -1211,6 +1250,7 @@ static void __init mx6_board_init(void)
 	 */
 	mxc_iomux_set_gpr_register(1, 21, 1, 1);
 #endif
+
 
 /*
 #ifdef CONFIG_TOUCHSCREEN_TSC2006
@@ -1222,7 +1262,7 @@ static void __init mx6_board_init(void)
 	gpio_request(MX6_FEC_RESET, "fec-reset");
 	gpio_direction_output(MX6_FEC_RESET, 1);
 //   GPIO for Ethernet reset
- 
+
 	gp_reg_id = dvfscore_data.reg_id;
 	soc_reg_id = dvfscore_data.soc_id;
 	pu_reg_id = dvfscore_data.pu_id;
@@ -1283,7 +1323,7 @@ static void __init mx6_board_init(void)
 //	spi_device_init();;
 
 	imx6q_add_mxc_hdmi(&hdmi_data);
-	
+
 	if (imx_ion_data.heaps[0].size)
 		imx6q_add_ion(0, &imx_ion_data,
 			sizeof(imx_ion_data) + sizeof(struct ion_platform_heap));
@@ -1316,6 +1356,8 @@ static void __init mx6_board_init(void)
 
 	imx6q_add_mxc_pwm(0);
 	imx6q_add_mxc_pwm(1);
+	imx6q_add_mxc_pwm(2);
+	imx6q_add_mxc_pwm(3);
 
 	imx6q_add_mxc_pwm_backlight(0, &mx6_pwm_backlight_data);
 
@@ -1329,7 +1371,7 @@ static void __init mx6_board_init(void)
 	imx6q_add_hdmi_soc();
 	imx6q_add_hdmi_soc_dai();
 
-#if defined(CONFIG_MX6_PCIE) 
+#if defined(CONFIG_MX6_PCIE)
 	imx6q_add_pcie(&mx6_pcie_data);
 #endif
 	clko2 = clk_get(NULL, "clko2_clk");
@@ -1344,7 +1386,7 @@ static void __init mx6_board_init(void)
 	rate = clk_round_rate(clko2, 24000000);
 	clk_set_rate(clko2, rate);
 	clk_enable(clko2);
-	
+
 	imx6q_add_busfreq();
 
 	imx6_add_armpmu();
@@ -1360,6 +1402,7 @@ static void __init mx6_board_init(void)
 	imx6q_add_perfmon(0);
 	imx6q_add_perfmon(1);
 	imx6q_add_perfmon(2);
+	platform_device_register(&imx_pwm_leds_dev);
 }
 
 extern void __iomem *twd_base;

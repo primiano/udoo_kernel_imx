@@ -36,14 +36,22 @@ static void led_pwm_set(struct led_classdev *led_cdev,
 	struct led_pwm_data *led_dat =
 		container_of(led_cdev, struct led_pwm_data, cdev);
 	unsigned int max = led_dat->cdev.max_brightness;
-	unsigned int period =  led_dat->period;
+	unsigned int period = led_cdev->period ? led_cdev->period : led_dat->period;
 
 	if (brightness == 0) {
 		pwm_config(led_dat->pwm, 0, period);
 		pwm_disable(led_dat->pwm);
 	} else {
-		pwm_config(led_dat->pwm, brightness * period / max, period);
-		pwm_enable(led_dat->pwm);
+		if (led_cdev->period) {
+			pr_warning("PWM set slow %d / %d\n", brightness, period);
+			pwm_config_32k(led_dat->pwm, brightness, period);
+			pwm_enable(led_dat->pwm);
+		} else {
+			const int duty_ns = brightness * period / max;
+			pr_warning("PWM set %d / %d\n", duty_ns, period);
+			pwm_config(led_dat->pwm, duty_ns, period);
+			pwm_enable(led_dat->pwm);
+		}
 	}
 }
 
@@ -62,9 +70,12 @@ static int led_pwm_probe(struct platform_device *pdev)
 	if (!leds_data)
 		return -ENOMEM;
 
+	dev_err(&pdev->dev, "PWM leds num %d\n", pdata->num_leds);
 	for (i = 0; i < pdata->num_leds; i++) {
 		cur_led = &pdata->leds[i];
 		led_dat = &leds_data[i];
+
+		dev_err(&pdev->dev, "PWM REQ num %d\n", i);
 
 		led_dat->pwm = pwm_request(cur_led->pwm_id,
 				cur_led->name);
@@ -79,12 +90,14 @@ static int led_pwm_probe(struct platform_device *pdev)
 		led_dat->cdev.default_trigger = cur_led->default_trigger;
 		led_dat->active_low = cur_led->active_low;
 		led_dat->period = cur_led->pwm_period_ns;
+		led_dat->cdev.period = cur_led->pwm_period_ns;
 		led_dat->cdev.brightness_set = led_pwm_set;
 		led_dat->cdev.brightness = LED_OFF;
 		led_dat->cdev.max_brightness = cur_led->max_brightness;
 		led_dat->cdev.flags |= LED_CORE_SUSPENDRESUME;
 
 		ret = led_classdev_register(&pdev->dev, &led_dat->cdev);
+		dev_err(&pdev->dev, "PWM led_classdev_register %d\n", ret);
 		if (ret < 0) {
 			pwm_free(led_dat->pwm);
 			goto err;
@@ -137,6 +150,7 @@ static struct platform_driver led_pwm_driver = {
 
 static int __init led_pwm_init(void)
 {
+    pr_warning("Primiano PWM LEDS\n"); /////////////// TODO REMOVE /////////////////////
 	return platform_driver_register(&led_pwm_driver);
 }
 

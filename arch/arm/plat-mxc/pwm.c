@@ -66,6 +66,29 @@ struct pwm_device {
 	void (*disable_pwm_pad)(void);
 };
 
+
+
+int pwm_config_32k(struct pwm_device *pwm, int duty_cycles, int period_cycles)
+{
+	if (pwm == NULL || duty_cycles == 0 || duty_cycles > period_cycles)
+		return -EINVAL;
+
+	u32 cr;
+
+	pr_warning("PWM HZ CYCLES %ld / %ld\n", duty_cycles, period_cycles);
+	writel(duty_cycles, pwm->mmio_base + MX3_PWMSAR);
+	writel(period_cycles, pwm->mmio_base + MX3_PWMPR);
+
+	cr = MX3_PWMCR_CLKSRC_IPG_32k |
+		MX3_PWMCR_STOPEN | MX3_PWMCR_DOZEEN |
+		MX3_PWMCR_WAITEN | MX3_PWMCR_DBGEN;
+
+	writel(cr, pwm->mmio_base + MX3_PWMCR);
+
+	return 0;
+}
+EXPORT_SYMBOL(pwm_config_32k);
+
 int pwm_config(struct pwm_device *pwm, int duty_ns, int period_ns)
 {
 	if (pwm == NULL || period_ns == 0 || duty_ns > period_ns)
@@ -86,6 +109,8 @@ int pwm_config(struct pwm_device *pwm, int duty_ns, int period_ns)
 
 		prescale = period_cycles / 0x10000 + 1;
 
+		pr_warning("PWM CLK %lu / %lu\n", clk_get_rate(pwm->clk), prescale);
+
 		period_cycles /= prescale;
 		c = (unsigned long long)period_cycles * duty_ns;
 		do_div(c, period_ns);
@@ -100,6 +125,8 @@ int pwm_config(struct pwm_device *pwm, int duty_ns, int period_ns)
 		else
 			period_cycles = 0;
 
+		pr_warning("PWM CYCLES %lu / %lu\n", duty_cycles, period_cycles);
+		pr_warning("PWM CYCLES %lx / %lx\n", duty_cycles, period_cycles);
 		writel(duty_cycles, pwm->mmio_base + MX3_PWMSAR);
 		writel(period_cycles, pwm->mmio_base + MX3_PWMPR);
 
@@ -189,6 +216,8 @@ struct pwm_device *pwm_request(int pwm_id, const char *label)
 {
 	struct pwm_device *pwm;
 	int found = 0;
+
+	pr_warning("PWM request for %d from %s\n", pwm_id, label); /////////////// TODO REMOVE /////////////////////
 
 	mutex_lock(&pwm_lock);
 
