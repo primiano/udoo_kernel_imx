@@ -35,6 +35,7 @@
 #include <linux/i2c/pca953x.h>
 #include <linux/ata.h>
 #include <linux/ion.h>
+#include <linux/leds_pwm.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/map.h>
 #include <linux/mtd/partitions.h>
@@ -628,7 +629,7 @@ static struct fsl_mxc_ldb_platform_data ldb_data = {
 };
 
 static struct platform_pwm_backlight_data mx6_pwm_backlight_data = {
-	.pwm_id = 0,
+	.pwm_id = 1,
 	.max_brightness = 255,
 	.dft_brightness = 128,
 	.pwm_period_ns = 50000,
@@ -1152,9 +1153,47 @@ void set_gpios_directions(void)
 		}
 	}
 	else
-		printk("#### No gpios to export");	
+		printk("#### No gpios to export");
 }
 
+
+/***********************************************************************
+ *                              LED PWM                                *
+ ***********************************************************************/
+
+static struct led_pwm imx_pwm_leds[] = {
+	{
+		.name		= "pwm1",
+		.pwm_id		= 0,
+		.max_brightness	= 32768,
+		.pwm_period_ns	= 1000000,
+	},
+	{
+		.name		= "pwm3",
+		.pwm_id		= 2,
+		.max_brightness	= 32768,
+		.pwm_period_ns	= 1000000,
+	},
+	{
+		.name		= "pwm4",
+		.pwm_id		= 3,
+		.max_brightness	= 32768,
+		.pwm_period_ns	= 1000000,
+	},
+};
+
+static struct led_pwm_platform_data imx_pwm_data = {
+	.num_leds	= ARRAY_SIZE(imx_pwm_leds),
+	.leds		= imx_pwm_leds,
+};
+
+static struct platform_device imx_pwm_leds_dev = {
+	.name	= "leds_pwm",
+	.id	= -1,
+	.dev	= {
+		.platform_data = &imx_pwm_data,
+	},
+};
 
 
 /***********************************************************************
@@ -1316,6 +1355,8 @@ static void __init mx6_board_init(void)
 
 	imx6q_add_mxc_pwm(0);
 	imx6q_add_mxc_pwm(1);
+	imx6q_add_mxc_pwm(2);
+	imx6q_add_mxc_pwm(3);
 
 	imx6q_add_mxc_pwm_backlight(0, &mx6_pwm_backlight_data);
 
@@ -1360,6 +1401,7 @@ static void __init mx6_board_init(void)
 	imx6q_add_perfmon(0);
 	imx6q_add_perfmon(1);
 	imx6q_add_perfmon(2);
+	platform_device_register(&imx_pwm_leds_dev);
 }
 
 extern void __iomem *twd_base;
