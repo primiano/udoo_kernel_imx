@@ -12,6 +12,11 @@
 *	 (indirizzo mux, indirizzo pad, mux, 0x0000, 0, valori per pad)
 ******************************************************************/
 
+#define MX6Q_PAD_ENET_RX_ER__USB_OTG_ID__PULLDOWN \
+               (IOMUX_PAD(0x04EC, 0x01D8, 0, 0x0000, 0, (PAD_CTL_PKE | PAD_CTL_PUE | \
+                PAD_CTL_PUS_100K_DOWN | PAD_CTL_SPEED_LOW | PAD_CTL_DSE_80ohm | \
+                PAD_CTL_SRE_FAST | PAD_CTL_HYS)))
+
 // ERASE ARDUINO
 #define MX6Q_PAD_DISP0_DAT0__GPIO_4_21_PULLDOWN	\
 		(IOMUX_PAD(0x0484, 0x0170, 5, 0x0000, 0, 0x30B1))
@@ -122,6 +127,8 @@
 
 
 static iomux_v3_cfg_t mx6qd_UDOO_pads[] = {
+
+  MX6Q_PAD_ENET_RX_ER__USB_OTG_ID__PULLDOWN,      // pull down to force OTG HOST mode
 
         /* AUDMUX */
 	MX6Q_PAD_DI0_PIN2__AUDMUX_AUD6_TXD,  //    - for AUDIO AUDMUX port 6
